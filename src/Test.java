@@ -1,7 +1,18 @@
+import java.util.Random;
+
 public class Test {
     public static void main(String[] args) {
-        Diagramm.plot(new double[] {1,2,3,4,5}, new double[] {9,0,1,6,4});
+        Random r = new Random();
+        PhysModel pm = new PhysModel(r,new NoReg());
+        pm.model();
+        Diagramm.plot(pm.timeArray, pm.tOutArray);
         Diagramm.hold(true);
-        Diagramm.plot(new double[] {9,3,4}, new double[] {4,5,1});
+        Diagramm.plot(pm.timeArray,pm.tSensorArray);
+    }
+}
+
+class NoReg implements Regulator{
+    public double control(double t_sensor) {
+        return 0;
     }
 }

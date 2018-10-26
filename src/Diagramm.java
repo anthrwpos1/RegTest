@@ -11,6 +11,7 @@ import java.util.TreeMap;
 public class Diagramm {
     private static TreeMap<String, Figure> figures = new TreeMap<>();//окна с графиками
     private static Figure currentFigure;//активное окно
+
     public static void figure(String figureName) {//метод смены активного окна
         if (currentFigure == null) {
             Figure figure = new Figure(figureName);
@@ -41,9 +42,9 @@ public class Diagramm {
 }
 
 class Figure extends JFrame {
+    public boolean hold = false;
     private PlotPanel plotArea;
     private JPanel statusPanel;
-    public boolean hold = false;
 
     Figure(String figureName) {
         setTitle(figureName);
@@ -120,33 +121,35 @@ class PlotPanel extends JPanel {//область построения
                     int y2 = toScreenYTransform(plotData.yArray[i + 1]);
                     g.drawLine(x1, y1, x2, y2);
                 }
-                g.drawLine(s,(getHeight()-s),getWidth()-s,(getHeight()-s));
-                g.drawLine(getWidth()-s,(getHeight()-s),getWidth()-s-10,(getHeight()-s)+5);
-                g.drawLine(getWidth()-s,(getHeight()-s),getWidth()-s-10,(getHeight()-s)-5);
-                g.drawLine(s,(getHeight()-s),s,s);
-                g.drawLine(s,s,s-5,s+10);
-                g.drawLine(s,s,s+5,s+10);
+                g.drawLine(s, (getHeight() - s), getWidth() - s, (getHeight() - s));
+                g.drawLine(getWidth() - s, (getHeight() - s), getWidth() - s - 10, (getHeight() - s) + 5);
+                g.drawLine(getWidth() - s, (getHeight() - s), getWidth() - s - 10, (getHeight() - s) - 5);
+                g.drawLine(s, (getHeight() - s), s, s);
+                g.drawLine(s, s, s - 5, s + 10);
+                g.drawLine(s, s, s + 5, s + 10);
                 double[] xmarks = axes.getxMarks();
                 double[] ymarks = axes.getyMarks();
-                for (int i=0; i<xmarks.length; i++){
+                for (int i = 0; i < xmarks.length; i++) {
                     int xmark = toScreenXTransform(xmarks[i]);
+                    g.drawLine(xmark, (getHeight() - s - 5), xmark, (getHeight() - s + 5));
+                    g.drawString(String.valueOf(xmarks[i]), xmark, (getHeight() - s));
+                }
+                for (int i = 0; i < ymarks.length; i++) {
                     int ymark = toScreenYTransform(ymarks[i]);
-                    g.drawLine(s-5,ymark,s+5,ymark);
-                    g.drawString(String.valueOf(ymarks[i]),s,ymark);
-                    g.drawLine(xmark,(getHeight()-s-5),xmark,(getHeight()-s+5));
-                    g.drawString(String.valueOf(xmarks[i]),xmark,(getHeight()-s));
+                    g.drawLine(s - 5, ymark, s + 5, ymark);
+                    g.drawString(String.valueOf(ymarks[i]), s, ymark);
                 }
             }
         }
     }
 
-    private int toScreenXTransform(double x){
+    private int toScreenXTransform(double x) {
         double xmin = axes.xmin;
         double dx = axes.xmax - axes.xmin;
         return (int) ((x - xmin) / dx * (double) (getWidth() - s)) + s;
     }
 
-    private  int toScreenYTransform(double y){
+    private int toScreenYTransform(double y) {
         double ymin = axes.ymin;
         double dy = axes.ymax - axes.ymin;
         return getHeight() - (int) ((y - ymin) / dy * (double) (getHeight() - s)) - s;
@@ -154,10 +157,10 @@ class PlotPanel extends JPanel {//область построения
 }
 
 class PlotData {
-    private int plotStyle;
     public Color lineColor = new Color(0, 0, 0);
     public double[] xArray;
     public double[] yArray;
+    private int plotStyle;
 
     PlotData(double[] xArray, double[] yArray) {
         this.xArray = xArray;
@@ -182,13 +185,8 @@ class PlotData {
 }
 
 class Axes {
-    public Double xmin, xmax, ymin, ymax;
-    private int xcnum = 6;
-    private int ycnum = 6;
     private static final double[] mantissList = {0.75, 1.0, 1.5, 2, 2.5, 3, 4, 5, 7.5};
     private static double[] logMantissList;
-    private double[] xMarks;
-    private double[] yMarks;
 
     static {
         logMantissList = new double[mantissList.length];
@@ -197,7 +195,13 @@ class Axes {
         }
     }
 
-    Axes(double xmin, double xmax, double ymin, double ymax){
+    public Double xmin, xmax, ymin, ymax;
+    private int xcnum = 6;
+    private int ycnum = 6;
+    private double[] xMarks;
+    private double[] yMarks;
+
+    Axes(double xmin, double xmax, double ymin, double ymax) {
         this.xmin = xmin;
         this.xmax = xmax;
         this.ymin = ymin;
@@ -207,24 +211,24 @@ class Axes {
     }
 
     private double[] axisMarks(int cnum, double min, double max) {
-        double pow = Math.floor(Math.log10((max - min)*10/cnum));
-        double en = (Math.log10((max - min)*10/cnum) - pow);
-        double enerr=2;
+        double pow = Math.floor(Math.log10((max - min) * 10 / cnum));
+        double en = (Math.log10((max - min) * 10 / cnum) - pow);
+        double enerr = 2;
         double curerr;
-        double mantiss=0;
-        for (int i=0; i< mantissList.length; i++){
-            if ((curerr = Math.abs(en-logMantissList[i])) < enerr) {
+        double mantiss = 0;
+        for (int i = 0; i < mantissList.length; i++) {
+            if ((curerr = Math.abs(en - logMantissList[i])) < enerr) {
                 enerr = curerr;
                 mantiss = mantissList[i];
             }
         }
-        double delay = Math.pow(10,(pow-1))*mantiss;
-        double markmin = Math.ceil(min/delay)*delay;
-        double markmax = Math.floor(max/delay)*delay;
-        int marksnum = (int) Math.round((markmax-markmin)/delay);
+        double delay = Math.pow(10, (pow - 1)) * mantiss;
+        double markmin = Math.ceil(min / delay) * delay;
+        double markmax = Math.floor(max / delay) * delay;
+        int marksnum = (int) Math.round((markmax - markmin) / delay);
         double[] marks = new double[marksnum];
         for (int i = 0; i < marksnum; i++) {
-            marks[i] = markmin+delay*(double) i;
+            marks[i] = markmin + delay * (double) i;
         }
         return marks;
     }
