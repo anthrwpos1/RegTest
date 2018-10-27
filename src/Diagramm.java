@@ -20,10 +20,15 @@ public class Diagramm {
         } else currentFigure = searchFigureByName(figureName);
     }
 
-    //Todo: сделать плот с цветом
     public static void plot(double[] x, double[] y) {//метод вывода графика заданного парой массивов
         if (currentFigure == null) figure("Figure 1");
         currentFigure.setPlotData(new PlotData(x, y));
+        currentFigure.repaint();
+    }
+
+    public static void plot(double[] x, double[] y, Color c){
+        if (currentFigure == null) figure("Figure 1");
+        currentFigure.setPlotData(new PlotData(x, y, c));
         currentFigure.repaint();
     }
 
@@ -82,7 +87,7 @@ class Figure extends JFrame {
     private void addElements() {//добавление элементов окна
         statusPanel = new JPanel();
         statusPanel.setMaximumSize(new Dimension(1920, 30));
-        statusLabel = new JLabel("Status string");//Todo: сделать чтобы сюда писалось ченить полезное
+        statusLabel = new JLabel("Status string");
         statusPanel.add(statusLabel);
         plotArea = new PlotPanel();
         plotArea.setMinimumSize(new Dimension(400, 300));
@@ -187,6 +192,12 @@ class PlotData {
     PlotData(double[] xArray, double[] yArray) {
         this.xArray = xArray;
         this.yArray = yArray;
+    }
+
+    public PlotData(double[] xArray, double[] yArray, Color c) {
+        this.xArray = xArray;
+        this.yArray = yArray;
+        lineColor  = c;
     }
 
     public double min(double[] array) {
