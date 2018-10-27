@@ -39,6 +39,17 @@ public class Diagramm {
         }
         return figure;
     }
+
+    public static void close(String name) {
+        System.out.println(name + " closed");
+        figures.get(name).dispose();
+        figures.remove(name);
+        if (figures.isEmpty()) {
+            System.out.println("Last window closed, exit programm.");
+            System.exit(0);
+        }
+        currentFigure = figures.get(figures.firstKey());
+    }
 }
 
 class Figure extends JFrame {
@@ -48,7 +59,7 @@ class Figure extends JFrame {
 
     Figure(String figureName) {
         setTitle(figureName);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         addElements();
         Container pane = getContentPane();
         GroupLayout lo = new GroupLayout(pane);

@@ -18,9 +18,11 @@ public class PhysModel {
     public double[] tSensorArray = new double[N];
     public double[] tOutArray = new double[N];
 
-    PhysModel(Random random, Regulator regulator) {
+    PhysModel(Random random, Regulator regulator, double fluct_amp, double fluct_time) {
         this.random = random;
         this.regulator = regulator;
+        this.fluct_amp = fluct_amp;
+        this.fluct_time = fluct_time;
     }
 
     public void model() {
@@ -34,7 +36,7 @@ public class PhysModel {
             tRoom = tRoom + (tHeater - tRoom) * Q_heater_room / C_room * dt + (tOut - tRoom) * Q_out_room / C_room * dt;
             tHeater = tHeater + (tRoom - tHeater) * Q_heater_room / C_heater * dt + limit(regulator.control(tSensor)) * P_heater_max / C_heater;
             sensorErr = sensorErr * (1 - dt / fluct_time) + (random.nextDouble() - 0.5) * fluct_amp * dt;
-            tSensor = tSensor + (tRoom - tSensor) / t_sensor * dt;
+            tSensor = tSensor + (tRoom - tSensor) / t_sensor * dt + sensorErr;
             tSensorArray[i] = tSensor;
             timeArray[i] = i*dt;
             tOutArray[i] = tOut;
