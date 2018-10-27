@@ -30,7 +30,8 @@ public class PhysModel {
         this.fluctTime = fluctTime;
     }
 
-    public void model() {
+    public double model(double set) {
+        double err = 0;
         double tOut = initialTOut;
         double tRoom = initialTOut;
         double tHeater = initialTOut;
@@ -48,7 +49,9 @@ public class PhysModel {
             timeArray[i] = i * dt;
             tOutArray[i] = tOut;
             powArray[i] = pHeater;
+            err += Math.pow((tRoom - set),2)/n;
         }
+        return Math.sqrt(err); // среднеквадратичное отклонение
     }
 
     private double limit(double in) {

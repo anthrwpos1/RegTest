@@ -30,7 +30,7 @@ public class PID implements Regulator {
         double err = tSet - t_f;
         dt_f = mavg.dnout[1];
         d2t_f = mavg.dnout[2];
-        state = state + (err / ti - dt_f - d2t_f * td) / xp;
+        state = state + (err / ti - dt_f - d2t_f * td) / xp * dt;
         return state;
     }
 }

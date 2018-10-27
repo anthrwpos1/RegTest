@@ -4,12 +4,12 @@ public class Test {
     public static void main(String[] args) {
         Random random = new Random();//создаем источник случайных чисел
         PID pid = new PID(3, 900, 60, 0.1, 60, 20);  //создаем ПИД-регулятор
-        PhysModel model = new PhysModel(random, pid, 0.001, 60);   //создаем физическую модель, передаем ей регулятор.
-        model.model();//моделируем
+        PhysModel model = new PhysModel(random, pid, 0, 6);   //создаем физическую модель, передаем ей регулятор.
+        System.out.printf("sum error = %f\n",model.model(20));//моделируем, выводим отклонение
         int pointsDisplay = 10000;
         for (int i = 0; i < 100000 - pointsDisplay; i += 100) {
-            int from = (i > pointsDisplay) ? i : 0;
-            int to = (i > pointsDisplay) ? i + pointsDisplay : i;
+            int from = (i > pointsDisplay) ? i - pointsDisplay : 0;
+            int to =  i;
             Diagramm.figure("Figure 1");
             Diagramm.hold(false);
             Diagramm.plot(subArray(model.timeArray, from, to), subArray(model.tSensorArray, from, to));                  //рисуем график температуры в комнате
