@@ -24,6 +24,7 @@ public class Diagramm {
     public static void plot(double[] x, double[] y) {//метод вывода графика заданного парой массивов
         if (currentFigure == null) figure("Figure 1");
         currentFigure.setPlotData(new PlotData(x, y));
+        currentFigure.repaint();
     }
 
     public static void hold(boolean h) {//true = накладывать графики друг на друга, false - заменять старые новыми
@@ -50,12 +51,21 @@ public class Diagramm {
         }
         currentFigure = figures.get(figures.firstKey());
     }
+
+    public static void setStatusText(String text) {
+        currentFigure.setStatusText(text);
+    }
 }
 
 class Figure extends JFrame {
     public boolean hold = false;
     private PlotPanel plotArea;
     private JPanel statusPanel;
+    private JLabel statusLabel;
+
+    public void setStatusText(String text) {
+        statusLabel.setText(text);
+    }
 
     Figure(String figureName) {
         setTitle(figureName);
@@ -72,8 +82,8 @@ class Figure extends JFrame {
     private void addElements() {//добавление элементов окна
         statusPanel = new JPanel();
         statusPanel.setMaximumSize(new Dimension(1920, 30));
-        JLabel label = new JLabel("Status string");//Todo: сделать чтобы сюда писалось ченить полезное
-        statusPanel.add(label);
+        statusLabel = new JLabel("Status string");//Todo: сделать чтобы сюда писалось ченить полезное
+        statusPanel.add(statusLabel);
         plotArea = new PlotPanel();
         plotArea.setMinimumSize(new Dimension(400, 300));
         plotArea.setBackground(new Color(192, 192, 192));
@@ -123,7 +133,8 @@ class PlotPanel extends JPanel {//область построения
     public void paintComponent(Graphics g) {//отрисовка Todo: добавить сетку
         super.paintComponent(g);            //          Todo: переделать графику через Swing.Graphics2D
         if (plotDatae != null) {
-            for (PlotData plotData : plotDatae) {
+            for (int i1 = 0; i1 < plotDatae.size(); i1++) {
+                PlotData plotData = plotDatae.get(i1);
                 g.setColor(plotData.lineColor);
                 for (int i = 0; i < (plotData.xArray.length - 1); i++) {
                     int x1 = toScreenXTransform(plotData.xArray[i]);
@@ -207,8 +218,8 @@ class Axes {
     }
 
     public Double xmin, xmax, ymin, ymax;
-    private int xcnum = 6;
-    private int ycnum = 6;
+    private int xcnum = 10;
+    private int ycnum = 10;
     private double[] xMarks;
     private double[] yMarks;
 

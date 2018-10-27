@@ -1,28 +1,33 @@
 import java.util.Random;
 
+/*  Физическая модель помещения с нагревателем, охлаждаемым теплопотерями в окружающую среду.
+ *
+ *  -Άνθρωπος
+ */
 public class PhysModel {
-    public double initialTOut = 17;   //Cgd
+    public double initialTOut = 17;   //Начальная температура, градус цельсия
     public Regulator regulator;
-    private double dt = 0.1;          //sec
-    private int N = 100000;           //1
-    private double Q_out_room = 50;   //W/K
-    private double C_room = 300000;   //J/K
-    private double Q_heater_room = 30;//W/K
-    private double C_heater = 500;    //J/K
-    private double P_heater_max = 1500;//W
-    private double t_sensor = 60;     //sec
-    private double fluct_amp;
-    private double fluct_time;
+    private double dt = 0.1;          //шаг времени моделирования, сек.
+    private int n = 100000;           //число моделируемых точек
+    private double qOutRoom = 500;   //Теплопроводность стен комнаты, Вт/кельвин
+    private double cRoom = 300000;   //Теплоемкость комнаты, Дж/кельвин
+    private double qHeaterRoom = 30;//Теплопроводность нагревателя, Вт/кельвин
+    private double cHeater = 500;    //Теплоемкость нагревателя, Дж/кельвин
+    private double pHeaterMax = 1500;//Мощность нагревателя, Вт
+    private double tSensor = 60;     //Инерция датчика, сек
+    private double fluctAmp;           //амплитуда флуктуаций температуры измеряемой датчиком, градусов в секунду
+    private double fluctTime;          //время ослабления накопленной флуктуации датчика, сек.
     private Random random;
-    public double[] timeArray = new double[N];
-    public double[] tSensorArray = new double[N];
-    public double[] tOutArray = new double[N];
+    public double[] timeArray = new double[n];
+    public double[] tSensorArray = new double[n];
+    public double[] tOutArray = new double[n];
+    public double[] powArray = new double[n];
 
-    PhysModel(Random random, Regulator regulator, double fluct_amp, double fluct_time) {
+    PhysModel(Random random, Regulator regulator, double fluctAmp, double fluctTime) {
         this.random = random;
         this.regulator = regulator;
-        this.fluct_amp = fluct_amp;
-        this.fluct_time = fluct_time;
+        this.fluctAmp = fluctAmp;
+        this.fluctTime = fluctTime;
     }
 
     public void model() {
@@ -30,16 +35,19 @@ public class PhysModel {
         double tRoom = initialTOut;
         double tHeater = initialTOut;
         double tSensor = initialTOut;
+        double pHeater;
         double sensorErr = 0;
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < n; i++) {
             tOut = tOut + (random.nextDouble() - 0.5) * dt;
-            tRoom = tRoom + (tHeater - tRoom) * Q_heater_room / C_room * dt + (tOut - tRoom) * Q_out_room / C_room * dt;
-            tHeater = tHeater + (tRoom - tHeater) * Q_heater_room / C_heater * dt + limit(regulator.control(tSensor)) * P_heater_max / C_heater;
-            sensorErr = sensorErr * (1 - dt / fluct_time) + (random.nextDouble() - 0.5) * fluct_amp * dt;
-            tSensor = tSensor + (tRoom - tSensor) / t_sensor * dt + sensorErr;
+            tRoom = tRoom + (tHeater - tRoom) * qHeaterRoom / cRoom * dt + (tOut - tRoom) * qOutRoom / cRoom * dt;
+            pHeater = limit(regulator.control(tSensor)) * pHeaterMax;
+            tHeater = tHeater + (tRoom - tHeater) * qHeaterRoom / cHeater * dt + pHeater / cHeater;
+            sensorErr = sensorErr * (1 - dt / fluctTime) + (random.nextDouble() - 0.5) * fluctAmp * dt;
+            tSensor = tSensor + (tRoom - tSensor) / this.tSensor * dt + sensorErr;
             tSensorArray[i] = tSensor;
-            timeArray[i] = i*dt;
+            timeArray[i] = i * dt;
             tOutArray[i] = tOut;
+            powArray[i] = pHeater;
         }
     }
 

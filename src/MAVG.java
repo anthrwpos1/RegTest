@@ -1,10 +1,13 @@
-// реализация скользящих средних.
+/* реализация скользящих средних.
+ *
+ * -Άνθρωπος
+ */
 public class MAVG {
-    private double[] state;
-    private double[] ds;
-    public double[] dnout;
-    private int order;
-    private int compensation;
+    private double[] state;     //вектор внутреннего состояния
+    private double[] ds;        //вектор добавок
+    public double[] dnout;      //n-я производная фильтруемой величины. dnout[0] - "нулевая производная" - сама отфильтрованная величина
+    private int order;          //порядок скользящей средней
+    private int compensation;   //компенсация тренда?
     public double dt;
     public double tau;
     int step = 0;
@@ -24,7 +27,7 @@ public class MAVG {
         double dem = dem(order);
         ds[0] = (in - state[0]) / dem;
         for (int i = 1; i < state.length; i++) {
-            ds[i] = (state[i-1] - state[i]) / dem;
+            ds[i] = (state[i - 1] - state[i]) / dem;
         }
         for (int i = 0; i < state.length; i++) {
             state[i] = state[i] + ds[i];
