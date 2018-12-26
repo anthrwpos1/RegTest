@@ -50,8 +50,9 @@ public class MAVG {
     }
 
     private double dem(int order) {
-        step += (step > (int) tau / dt) ? 0 : 1;
-        return ((step - 1) / order + 1);
+        int stepmax = (int) (tau / dt);
+        step = (step > stepmax) ? stepmax : step+1;
+        return ((step - 1) / order) + 1;
     }
 
 }

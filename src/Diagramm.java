@@ -135,8 +135,9 @@ class PlotPanel extends JPanel {//область построения
         axes.refresh(getLimits(pd));
     }
 
-    public void paintComponent(Graphics g) {//отрисовка Todo: добавить сетку
-        super.paintComponent(g);            //          Todo: переделать графику через Swing.Graphics2D
+    public void paintComponent(Graphics g1) {//отрисовка Todo: добавить сетку
+        Graphics2D g = (Graphics2D) g1;
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (plotDatae != null) {
             for (int i1 = 0; i1 < plotDatae.size(); i1++) {
                 PlotData plotData = plotDatae.get(i1);

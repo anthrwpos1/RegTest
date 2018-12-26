@@ -1,33 +1,30 @@
 public class PhysReg implements Regulator {
     public double t_filtre;
-    public double c, cH, q, tSet, dt, tau, pMax;
+    public double d, bhta, tU, tX, tSet, dt;
     private double wH, pe, p;
-    private MAVG mavg;
+    private MAVG TFiltre;
+    private MAVG PEFiltre;
 
-    PhysReg(double c, double cH, double q, double tSet, double t_filtre, double dt, double tau, double pMax) {
-        this.c = c;
-        this.cH = cH;
-        this.q = q;
-        this.tSet = tSet;
-        this.t_filtre = t_filtre;
+    PhysReg(double d, double tU, double tX, double dt, double tSet) {
+        this.d = d;
+        this.tU = tU;
+        this.tX = tX;
         this.dt = dt;
-        this.tau = tau;
-        this.pMax = pMax;
+        this.tSet = tSet;
+        bhta = 0;
         p = 0;
-        mavg = new MAVG(2, dt, t_filtre, true);
+        TFiltre = new MAVG(2, dt, t_filtre, true);
+        PEFiltre = new MAVG(1, dt, tX, false);
     }
 
     @Override
     public double control(double t_sensor) {
-        mavg.mavg(t_sensor);
-        double tH = wH / cH + tSet;
-        double wr = c * (mavg.dnout[0] - tSet);
-        wH = wH + q * (mavg.dnout[0] - tH) * dt + p * dt;
-        pe = q * (tH - mavg.dnout[0]) - mavg.dnout[1] * c;
-        double wset = cH * pe / q;
-        p = pe + (wset - wH - wr) / tau * dt;
-        if (p < 0) p = 0;
-        if (p > pMax) p = pMax;
-        return p / pMax;
+        TFiltre.mavg(t_sensor);
+        double err = tSet - TFiltre.dnout[0];
+        double dT = TFiltre.dnout[1];
+        wH = ((1-bhta) * p + bhta * pe - wH) / tU * dt + wH;
+        PEFiltre.mavg(wH - (1-bhta) * tX * dT);
+        pe = PEFiltre.dnout[0];
+        return d * err / tX + d * dT * tU / tX + pe;
     }
 }

@@ -1,7 +1,7 @@
 import java.awt.*;
 import java.util.Random;
 
-public class Test {
+public class Main {
     static PhysModel model1;
     static PhysModel model2;
     public static void main(String[] args) {
@@ -13,7 +13,7 @@ public class Test {
         model1 = new PhysModel(random, pid, 0.01, 6);
         System.out.printf("sum error model 1 = %f\n", model1.model(20));//моделируем, выводим отклонение
         random.setSeed(seed);
-        PhysReg pr = new PhysReg(300000,500,30,20,60,0.1,120,1500);
+        PhysReg pr = new PhysReg(100, 60, 600,0.1, 20);
            //Создаем еще модель с тем-же генератором случайных чисел, но другим регулятором.
         model2 = new PhysModel(random, pr, 0.01, 6);
         System.out.printf("sum error model 2 = %f\n", model2.model(20));//моделируем еще раз.
