@@ -7,10 +7,10 @@ import java.util.Random;
  *  -Άνθρωπος
  */
 public class PhysModel {
-    public double initialTOut = 17;   //Начальная температура, градус цельсия
+    public double initialTOut = 20;   //Начальная температура, градус цельсия
     public Regulator regulator;
     private double dt = 0.1;          //шаг времени моделирования, сек.
-    private int n = 10000;           //число моделируемых точек
+    private int n;           //число моделируемых точек
     private double qOutRoom = 500;   //Теплопроводность стен комнаты, Вт/кельвин
     private double cRoom = 300000;   //Теплоемкость комнаты, Дж/кельвин
     private double qHeaterRoom = 30;//Теплопроводность нагревателя, Вт/кельвин
@@ -20,28 +20,35 @@ public class PhysModel {
     private double fluctAmp;           //амплитуда флуктуаций температуры измеряемой датчиком, градусов в секунду
     private double fluctTime;          //время ослабления накопленной флуктуации датчика, сек.
     private Random random;
-    public double[] timeArray = new double[n];
-    public double[] tSensorArray = new double[n];
-    public double[] tOutArray = new double[n];
-    public double[] powArray = new double[n];
+    public double[] timeArray;
+    public double[] tSensorArray;
+    public double[] tOutArray;
+    public double[] powArray;
+    private double tout;
 
-    PhysModel(Random random, Regulator regulator, double fluctAmp, double fluctTime) {
+    PhysModel(Random random, Regulator regulator, double fluctAmp, double fluctTime, int n) {
+        this.n = n;
         this.random = random;
         this.regulator = regulator;
         this.fluctAmp = fluctAmp;
         this.fluctTime = fluctTime;
+        timeArray = new double[n];
+        tSensorArray = new double[n];
+        tOutArray = new double[n];
+        powArray = new double[n];
     }
 
-    public double model(double set) {
+    public double model(double set, double initialOut, double initialIn) {
         double err = 0;
-        double tOut = initialTOut;
-        double tRoom = initialTOut;
-        double tHeater = set;
-        double tSensor = set;
+        tout = initialOut;
+        double tOut;
+        double tRoom = initialIn;
+        double tHeater = initialIn;
+        double tSensor = initialIn;
         double pHeater;
         double sensorErr = 0;
         for (int i = 0; i < n; i++) {
-            tOut = tOut + (random.nextDouble() - 0.5) * dt;
+            tOut = setTOut((double) i * dt);
             tRoom = tRoom + (tHeater - tRoom) * qHeaterRoom / cRoom * dt + (tOut - tRoom) * qOutRoom / cRoom * dt;
             pHeater = limit(regulator.control(tSensor)) * pHeaterMax;
             tHeater = tHeater + (tRoom - tHeater) * qHeaterRoom / cHeater * dt + pHeater / cHeater;
@@ -62,5 +69,9 @@ public class PhysModel {
         return in;
     }
 
+    public double setTOut(double time){
+        tout = tout + (random.nextDouble() - 0.5) * dt;
+        return tout;
+    }
 }
 

@@ -32,9 +32,13 @@ public class PhysReg implements Regulator {
         TFiltre.mavg(t_sensor);
         double err = tSet - TFiltre.dnout[0];
         double dT = TFiltre.dnout[1];
-        wH = ((1-bhta) * p + bhta * pe - wH) / tU * dt + wH;
-        PEFiltre.mavg(wH - (1-bhta) * tX * dT);
+        wH = ((1 - bhta) * p + bhta * pe - wH) / tU * dt + wH;
+        PEFiltre.mavg(wH - (1 - bhta) * d * dT);
         pe = PEFiltre.dnout[0];
-        return d * err / tX - d * dT * tU / tX + pe;
+        double pRaw = d * err / tX - d * dT * tU / tX + pe;
+        p = pRaw;
+        if (p < 0) p = 0;
+        if (p > 1) p = 1;
+        return pRaw;
     }
 }
