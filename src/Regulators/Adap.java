@@ -1,3 +1,7 @@
+package Regulators;
+
+import Regulators.MAVG;
+
 public class Adap {
     private MAVG filtre, mid;
     public double dt;

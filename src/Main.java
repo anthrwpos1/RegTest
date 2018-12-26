@@ -1,5 +1,14 @@
+import Regulators.PID_Fine;
+import Regulators.PID_Rude;
+import Regulators.PhysReg;
+
 import java.awt.*;
 import java.util.Random;
+
+/* Испытательный стенд регуляторов
+ *
+ * -Ανθρωπος
+ */
 
 public class Main {
     static PhysModel model1;
@@ -8,16 +17,16 @@ public class Main {
         Random random = new Random();//создаем источник случайных чисел
         long seed = random.nextLong();
         random.setSeed(seed);
-        PID pid = new PID(3, 300, 60, 0.1, 60, 20);  //создаем ПИД-регулятор
+        PID_Fine pid = new PID_Fine(1, 100, 70, 0.1, 1, 20);  //создаем ПИД-регулятор
            //создаем физическую модель, передаем ей регулятор.
-        model1 = new PhysModel(random, pid, 0.01, 6);
+        model1 = new PhysModel(random, pid, 0.001, 6);
         System.out.printf("sum error model 1 = %f\n", model1.model(20));//моделируем, выводим отклонение
         random.setSeed(seed);
-        PhysReg pr = new PhysReg(100, 60, 600,0.1, 20);
+        PhysReg pr = new PhysReg(90, 30, 20,0.1, 20, 1);
            //Создаем еще модель с тем-же генератором случайных чисел, но другим регулятором.
-        model2 = new PhysModel(random, pr, 0.01, 6);
+        model2 = new PhysModel(random, pr, 0.001, 6);
         System.out.printf("sum error model 2 = %f\n", model2.model(20));//моделируем еще раз.
-        showProcess(10000);
+        showProcess(1000);
         Diagramm.close("Figure 1");
     }
 
@@ -30,7 +39,7 @@ public class Main {
     }
 
     public static void showProcess(int pointsDisplay) {
-        for (int i = 1; i < 100000 - pointsDisplay; i += 100) {
+        for (int i = 1; i < 10000 - pointsDisplay; i += 10) {
             int from = (i > pointsDisplay) ? i - pointsDisplay : 0;
             int to = i;
             Diagramm.figure("Figure 1");
@@ -51,7 +60,7 @@ public class Main {
     }
 }
 
-//class NoReg implements Regulator{
+//class NoReg implements Regulators.Regulator{
 //    public double control(double t_sensor) {
 //        return 0;
 //    }

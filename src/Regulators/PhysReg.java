@@ -1,3 +1,12 @@
+package Regulators;
+
+/* Мой регулятор. Использует ПД-регулятор в качестве основы
+ * и авторский способ вычисления добавки, компенсирующей
+ * статическую ошибку ПД-регулятора
+ *
+ * -Άνθρωπος
+ */
+
 public class PhysReg implements Regulator {
     public double t_filtre;
     public double d, bhta, tU, tX, tSet, dt;
@@ -5,16 +14,17 @@ public class PhysReg implements Regulator {
     private MAVG TFiltre;
     private MAVG PEFiltre;
 
-    PhysReg(double d, double tU, double tX, double dt, double tSet) {
+    public PhysReg(double d, double tU, double tX, double dt, double tSet, double t_filtre) {
         this.d = d;
         this.tU = tU;
         this.tX = tX;
         this.dt = dt;
         this.tSet = tSet;
+        this.t_filtre = t_filtre;
         bhta = 0;
         p = 0;
         TFiltre = new MAVG(2, dt, t_filtre, true);
-        PEFiltre = new MAVG(1, dt, tX, false);
+        PEFiltre = new MAVG(1, dt, tX, true);
     }
 
     @Override
@@ -25,6 +35,6 @@ public class PhysReg implements Regulator {
         wH = ((1-bhta) * p + bhta * pe - wH) / tU * dt + wH;
         PEFiltre.mavg(wH - (1-bhta) * tX * dT);
         pe = PEFiltre.dnout[0];
-        return d * err / tX + d * dT * tU / tX + pe;
+        return d * err / tX - d * dT * tU / tX + pe;
     }
 }

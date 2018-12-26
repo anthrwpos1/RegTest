@@ -1,3 +1,5 @@
+import Regulators.Regulator;
+
 import java.util.Random;
 
 /*  Физическая модель помещения с нагревателем, охлаждаемым теплопотерями в окружающую среду.
@@ -8,7 +10,7 @@ public class PhysModel {
     public double initialTOut = 17;   //Начальная температура, градус цельсия
     public Regulator regulator;
     private double dt = 0.1;          //шаг времени моделирования, сек.
-    private int n = 100000;           //число моделируемых точек
+    private int n = 10000;           //число моделируемых точек
     private double qOutRoom = 500;   //Теплопроводность стен комнаты, Вт/кельвин
     private double cRoom = 300000;   //Теплоемкость комнаты, Дж/кельвин
     private double qHeaterRoom = 30;//Теплопроводность нагревателя, Вт/кельвин
@@ -34,8 +36,8 @@ public class PhysModel {
         double err = 0;
         double tOut = initialTOut;
         double tRoom = initialTOut;
-        double tHeater = initialTOut;
-        double tSensor = initialTOut;
+        double tHeater = set;
+        double tSensor = set;
         double pHeater;
         double sensorErr = 0;
         for (int i = 0; i < n; i++) {

@@ -1,10 +1,11 @@
+package Regulators;
 /* Простой "тупой" ПИД-регулятор
  * Такой алгоритм используется почти повсеместно.
  *
  * -Άνθρωπος
  */
 
-public class PID implements Regulator {
+public class PID_Rude implements Regulator {
     public double t_filtre; //время фильтрации
     private double t_f;
     private double dt_f;
@@ -13,7 +14,7 @@ public class PID implements Regulator {
     private double state;
     private MAVG mavg;
 
-    PID(double xp, double ti, double td, double dt, double t_filtre, double tSet) {
+    public PID_Rude(double xp, double ti, double td, double dt, double t_filtre, double tSet) {
         this.xp = xp;
         this.ti = ti;
         this.td = td;
