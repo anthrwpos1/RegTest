@@ -26,6 +26,11 @@ public class MAVG {
     }
 
     public void mavg(double in) {
+        if (step == 0){
+            for (int i = 0; i < state.length; i++) {
+                state[i] = in;
+            }
+        }
         double dem = dem(order);
         ds[0] = (in - state[0]) / dem;
         for (int i = 1; i < state.length; i++) {
@@ -49,6 +54,23 @@ public class MAVG {
                 dnout[i] = dnout[i] + dnout[i + 1] * tav;
             }
         }
+    }
+
+    private void mavg1(double in){
+        double dem = dem(order);
+        ds[0] = (in - state[0]) / dem;
+        state[0] = state[0] + ds[0];
+        dnout[0] = state[0];
+    }
+
+    private void mavg2(double in){
+        double dem = dem(order);
+        ds[0] = (in - state[0]) / dem;
+        ds[1] = (state[0] - state[1]) / dem;
+        state[0] = state[0] + ds[0];
+        state[1] = state[1] + ds[1];
+        dnout[0] = state[1];
+        dnout[1] = ds[0] / dt;
     }
 
     private double dem(int order) {

@@ -24,6 +24,8 @@ public class PhysModel {
     public double[] tSensorArray;
     public double[] tOutArray;
     public double[] powArray;
+    public double[] pEArray;
+    public double[] wHArray;
     private double tout;
 
     PhysModel(Random random, Regulator regulator, double fluctAmp, double fluctTime, int n) {
@@ -36,6 +38,8 @@ public class PhysModel {
         tSensorArray = new double[n];
         tOutArray = new double[n];
         powArray = new double[n];
+        pEArray = new double[n];
+        wHArray = new double[n];
     }
 
     public double model(double set, double initialOut, double initialIn) {
@@ -54,10 +58,12 @@ public class PhysModel {
             tHeater = tHeater + (tRoom - tHeater) * qHeaterRoom / cHeater * dt + pHeater / cHeater;
             sensorErr = sensorErr * (1 - dt / fluctTime) + (random.nextDouble() - 0.5) * fluctAmp * dt;
             tSensor = tSensor + (tRoom - tSensor) / this.tSensor * dt + sensorErr;
-            tSensorArray[i] = tSensor;
+            tSensorArray[i] = tRoom;
             timeArray[i] = i * dt;
             tOutArray[i] = tOut;
             powArray[i] = pHeater;
+            pEArray[i] = (tRoom - tOut) * qOutRoom * dt;
+            wHArray[i] = (tHeater - tRoom) * qHeaterRoom * dt;
             err += Math.pow((tRoom - set),2)/n;
         }
         return Math.sqrt(err); // среднеквадратичное отклонение

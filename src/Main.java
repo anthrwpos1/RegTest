@@ -29,7 +29,7 @@ public class Main {
         };
         System.out.printf("sum error model 1 = %f\n", model1.model(20, 17, 20));//моделируем, выводим отклонение
         random.setSeed(seed);
-        PhysReg pr = new PhysReg(72, 85, 1.5, 0.1, 20, 0.3);
+        PhysReg pr = new PhysReg(200, 32, 100, 0.1, 20, 1);
         //Создаем еще модель с тем-же генератором случайных чисел, но другим регулятором.
         model2 = new PhysModel(random, pr, 0.000, 6, n) {
             @Override

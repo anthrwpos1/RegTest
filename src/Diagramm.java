@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -15,6 +16,12 @@ public class Diagramm {
     public static void figure(String figureName) {//метод смены активного окна
         if (currentFigure == null) {
             Figure figure = new Figure(figureName);
+            figure.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent windowEvent) {
+                    close(figureName);
+                }
+            });
             figures.put(figureName, figure);
             currentFigure = figure;
         } else currentFigure = searchFigureByName(figureName);
@@ -26,7 +33,7 @@ public class Diagramm {
         currentFigure.repaint();
     }
 
-    public static void plot(double[] x, double[] y, Color c){
+    public static void plot(double[] x, double[] y, Color c) {
         if (currentFigure == null) figure("Figure 1");
         currentFigure.setPlotData(new PlotData(x, y, c));
         currentFigure.repaint();
@@ -41,6 +48,12 @@ public class Diagramm {
         Figure figure = figures.get(figureName);
         if (figure == null) {
             figure = new Figure(figureName);
+            figure.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent windowEvent) {
+                    close(figureName);
+                }
+            });
             figures.put(figureName, figure);
         }
         return figure;
@@ -67,6 +80,7 @@ class Figure extends JFrame {
     private PlotPanel plotArea;
     private JPanel statusPanel;
     private JLabel statusLabel;
+    private double currentx;
 
     public void setStatusText(String text) {
         statusLabel.setText(text);
@@ -74,7 +88,7 @@ class Figure extends JFrame {
 
     Figure(String figureName) {
         setTitle(figureName);
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addElements();
         Container pane = getContentPane();
         GroupLayout lo = new GroupLayout(pane);
@@ -92,6 +106,27 @@ class Figure extends JFrame {
         plotArea = new PlotPanel();
         plotArea.setMinimumSize(new Dimension(400, 300));
         plotArea.setBackground(new Color(192, 192, 192));
+        plotArea.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                plotArea.zoom((double) e.getWheelRotation() * 0.1, currentx);
+                repaint();
+            }
+        });
+        plotArea.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                double newx = (double) e.getX() / getWidth();
+                plotArea.shift(currentx - newx);
+                currentx = newx;
+                repaint();
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                currentx = (double) e.getX() / getWidth();
+            }
+        });
     }
 
     private void makeLayout(GroupLayout lo) {//расположение элементов
@@ -124,6 +159,25 @@ class PlotPanel extends JPanel {//область построения
                 pd.max(pd.yArray));
     }
 
+    public void shift(double dx) {
+        double wide = axes.xmax - axes.xmin;
+        double min = axes.xmin;
+        double ymin = axes.ymin;
+        double ymax = axes.ymax;
+        axes = new Axes(min + dx * wide, min + (1 + dx) * wide, ymin, ymax);
+    }
+
+    public void zoom(double coeff, double midpoint) {
+        double wide = axes.xmax - axes.xmin;
+        double xmid = axes.xmin + wide * midpoint;
+        double ymin = axes.ymin;
+        double ymax = axes.ymax;
+        axes = new Axes(
+                xmid - wide * (1 + coeff) * midpoint,
+                xmid + wide * (1 + coeff) * (1 - midpoint),
+                ymin, ymax);
+    }
+
     public void setPlot(PlotData pd) {//замена графика
         plotDatae = new ArrayList<>();
         plotDatae.add(pd);
@@ -135,9 +189,8 @@ class PlotPanel extends JPanel {//область построения
         axes.refresh(getLimits(pd));
     }
 
-    public void paintComponent(Graphics g1) {//отрисовка Todo: добавить сетку
-        Graphics2D g = (Graphics2D) g1;
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    public void paintComponent(Graphics g) {//отрисовка
+        super.paintComponent(g);            //
         if (plotDatae != null) {
             for (int i1 = 0; i1 < plotDatae.size(); i1++) {
                 PlotData plotData = plotDatae.get(i1);
@@ -149,6 +202,7 @@ class PlotPanel extends JPanel {//область построения
                     int y2 = toScreenYTransform(plotData.yArray[i + 1]);
                     g.drawLine(x1, y1, x2, y2);
                 }
+                g.setColor(Color.BLACK);
                 g.drawLine(s, (getHeight() - s), getWidth() - s, (getHeight() - s));
                 g.drawLine(getWidth() - s, (getHeight() - s), getWidth() - s - 10, (getHeight() - s) + 5);
                 g.drawLine(getWidth() - s, (getHeight() - s), getWidth() - s - 10, (getHeight() - s) - 5);
@@ -159,11 +213,17 @@ class PlotPanel extends JPanel {//область построения
                 double[] ymarks = axes.getyMarks();
                 for (int i = 0; i < xmarks.length; i++) {
                     int xmark = toScreenXTransform(xmarks[i]);
-                    g.drawLine(xmark, (getHeight() - s - 5), xmark, (getHeight() - s + 5));
+                    g.setColor(new Color(0,0,0,16));
+                    g.drawLine(xmark, (getHeight() - s), xmark, (s));
+                    g.setColor(new Color(0,0,0,255));
+                    g.drawLine(xmark, (getHeight() - s), xmark, (getHeight() - s + 5));
                     g.drawString(String.valueOf(xmarks[i]), xmark, (getHeight() - s));
                 }
                 for (int i = 0; i < ymarks.length; i++) {
                     int ymark = toScreenYTransform(ymarks[i]);
+                    g.setColor(new Color(0,0,0,16));
+                    g.drawLine(s, ymark, getWidth() - s, ymark);
+                    g.setColor(new Color(0,0,0,255));
                     g.drawLine(s - 5, ymark, s + 5, ymark);
                     g.drawString(String.valueOf(ymarks[i]), s, ymark);
                 }
@@ -198,7 +258,7 @@ class PlotData {
     public PlotData(double[] xArray, double[] yArray, Color c) {
         this.xArray = xArray;
         this.yArray = yArray;
-        lineColor  = c;
+        lineColor = c;
     }
 
     public double min(double[] array) {
