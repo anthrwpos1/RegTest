@@ -18,9 +18,9 @@ public class Main {
         Random random = new Random();//создаем источник случайных чисел
         long seed = random.nextLong();
         random.setSeed(seed);
-        PID_Fine pid = new PID_Fine(0.027, 256, 90, 0.1, 0.0001, 20);  //создаем ПИД-регулятор
+        PID_Fine pid = new PID_Fine(6, 300, 200, 0.1, 40, 20);  //создаем ПИД-регулятор
         //создаем физическую модель, передаем ей регулятор.
-        model1 = new PhysModel(random, pid, 0.000, 6, n) {
+        model1 = new PhysModel(random, pid, 0.0001, 60, n) {
             @Override
             public double setTOut(double time) {
 //                return super.setTOut(time);
@@ -29,22 +29,33 @@ public class Main {
         };
         System.out.printf("sum error model 1 = %f\n", model1.model(20, 17, 20));//моделируем, выводим отклонение
         random.setSeed(seed);
-        PhysReg pr = new PhysReg(200, 32, 100, 0.1, 20, 1);
+        PhysReg pr = new PhysReg(50, 200, 300, 0.1, 20, 40, 300);
         //Создаем еще модель с тем-же генератором случайных чисел, но другим регулятором.
-        model2 = new PhysModel(random, pr, 0.000, 6, n) {
+        model2 = new PhysModel(random, pr, 0.0001, 60, n) {
             @Override
             public double setTOut(double time) {
 //                return super.setTOut(time);
                 return functionT(time);
             }
         };
-        System.out.printf("sum error model 2 = %f\n", model2.model(20,17,20));//моделируем еще раз.
+        System.out.printf("sum error model 2 = %f\n", model2.model(20, 17, 20));//моделируем еще раз.
 //        showProcess(10000, n, 100);
 //        Diagramm.close("Figure 1");
 //        Diagramm.plot(model1.timeArray,model1.tOutArray);
-        Diagramm.plot(model1.timeArray, model1.tSensorArray, Color.RED);
+        Diagramm.plot(model1.timeArray, model1.tSensorArray, Color.BLUE);
         Diagramm.hold(true);
-        Diagramm.plot(model2.timeArray, model2.tSensorArray, Color.BLACK);
+        Diagramm.plot(model2.timeArray, model2.tSensorArray, Color.RED);
+        Diagramm.plot(model1.timeArray, model1.tRoomArray, Color.CYAN);
+        Diagramm.plot(model2.timeArray, model2.tRoomArray, Color.PINK);
+        Diagramm.figure("Powers");
+        Diagramm.plot(model1.timeArray, model1.powArray, Color.BLUE);
+        Diagramm.hold(true);
+        Diagramm.plot(model2.timeArray, model2.powArray, Color.RED);
+        double[] pE = pr.pEArr.stream().mapToDouble(d -> d * 1500).toArray();
+        double[] xi = pid.xiArray.stream().mapToDouble(d -> d * 1500).toArray();
+        Diagramm.plot(model2.timeArray, pE, Color.PINK);
+        Diagramm.plot(model1.timeArray, xi, Color.CYAN);
+        Diagramm.plot(model1.timeArray, model1.pEArray, Color.BLACK);
     }
 
     static double functionT(double time) {

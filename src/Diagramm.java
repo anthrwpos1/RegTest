@@ -104,8 +104,7 @@ class Figure extends JFrame {
         statusLabel = new JLabel("Status string");
         statusPanel.add(statusLabel);
         plotArea = new PlotPanel();
-        plotArea.setMinimumSize(new Dimension(400, 300));
-        plotArea.setBackground(new Color(192, 192, 192));
+        plotArea.setMinimumSize(new Dimension(1024, 300));
         plotArea.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
@@ -189,8 +188,11 @@ class PlotPanel extends JPanel {//область построения
         axes.refresh(getLimits(pd));
     }
 
-    public void paintComponent(Graphics g) {//отрисовка
-        super.paintComponent(g);            //
+    public void paintComponent(Graphics g1) {//отрисовка
+        Graphics2D g = (Graphics2D) g1;
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g1.setColor(new Color(119, 119, 119));
+        g1.clearRect(0, 0, getWidth(), getHeight());
         if (plotDatae != null) {
             for (int i1 = 0; i1 < plotDatae.size(); i1++) {
                 PlotData plotData = plotDatae.get(i1);
@@ -213,17 +215,17 @@ class PlotPanel extends JPanel {//область построения
                 double[] ymarks = axes.getyMarks();
                 for (int i = 0; i < xmarks.length; i++) {
                     int xmark = toScreenXTransform(xmarks[i]);
-                    g.setColor(new Color(0,0,0,16));
+                    g.setColor(new Color(0, 0, 0, 16));
                     g.drawLine(xmark, (getHeight() - s), xmark, (s));
-                    g.setColor(new Color(0,0,0,255));
+                    g.setColor(new Color(0, 0, 0, 255));
                     g.drawLine(xmark, (getHeight() - s), xmark, (getHeight() - s + 5));
                     g.drawString(String.valueOf(xmarks[i]), xmark, (getHeight() - s));
                 }
                 for (int i = 0; i < ymarks.length; i++) {
                     int ymark = toScreenYTransform(ymarks[i]);
-                    g.setColor(new Color(0,0,0,16));
+                    g.setColor(new Color(0, 0, 0, 16));
                     g.drawLine(s, ymark, getWidth() - s, ymark);
-                    g.setColor(new Color(0,0,0,255));
+                    g.setColor(new Color(0, 0, 0, 255));
                     g.drawLine(s - 5, ymark, s + 5, ymark);
                     g.drawString(String.valueOf(ymarks[i]), s, ymark);
                 }

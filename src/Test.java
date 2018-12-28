@@ -10,7 +10,7 @@ public class Test {
         double[] wH;
         double[] pE;
         Random r = new Random();
-        PhysReg reg = new PhysReg(200, 17, 100, 0.1, 20, 60);
+        PhysReg reg = new PhysReg(200, 17, 100, 0.1, 20, 60,60);
         reg.bhta = 500/300500;
         PhysModel pm = new PhysModel(r, reg, 0, 1, n);
         pm.model(20,17,20);

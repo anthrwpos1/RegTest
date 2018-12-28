@@ -22,6 +22,7 @@ public class PhysModel {
     private Random random;
     public double[] timeArray;
     public double[] tSensorArray;
+    public double[] tRoomArray;
     public double[] tOutArray;
     public double[] powArray;
     public double[] pEArray;
@@ -36,6 +37,7 @@ public class PhysModel {
         this.fluctTime = fluctTime;
         timeArray = new double[n];
         tSensorArray = new double[n];
+        tRoomArray = new double[n];
         tOutArray = new double[n];
         powArray = new double[n];
         pEArray = new double[n];
@@ -51,14 +53,23 @@ public class PhysModel {
         double tSensor = initialIn;
         double pHeater;
         double sensorErr = 0;
+        double dSense0, dSense1, dSense2;
+        double sens0=initialIn, sens1=initialIn, sens2=initialIn;
         for (int i = 0; i < n; i++) {
             tOut = setTOut((double) i * dt);
             tRoom = tRoom + (tHeater - tRoom) * qHeaterRoom / cRoom * dt + (tOut - tRoom) * qOutRoom / cRoom * dt;
             pHeater = limit(regulator.control(tSensor)) * pHeaterMax;
             tHeater = tHeater + (tRoom - tHeater) * qHeaterRoom / cHeater * dt + pHeater / cHeater;
             sensorErr = sensorErr * (1 - dt / fluctTime) + (random.nextDouble() - 0.5) * fluctAmp * dt;
-            tSensor = tSensor + (tRoom - tSensor) / this.tSensor * dt + sensorErr;
-            tSensorArray[i] = tRoom;
+            dSense0 = (tRoom - sens0) / this.tSensor * dt;
+            dSense1 = (sens0 - tSensor) / this.tSensor * dt;
+//            dSense2 = (sens1 - tSensor) / this.tSensor * dt;
+            sens0 += dSense0;
+//            sens1 += dSense1;
+//            sens2 += dSense2;
+            tSensor += dSense1 + sensorErr;
+            tSensorArray[i] = tSensor;
+            tRoomArray[i] = tRoom;
             timeArray[i] = i * dt;
             tOutArray[i] = tOut;
             powArray[i] = pHeater;

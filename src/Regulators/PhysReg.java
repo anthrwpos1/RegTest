@@ -10,7 +10,7 @@ package Regulators;
 import java.util.ArrayList;
 
 public class PhysReg implements Regulator {
-    public double t_filtre;
+    public double t_filtre, pe_filtre;
     public double d, bhta, tU, tX, tSet, dt;
     private double wH;
     private double pe;
@@ -20,17 +20,18 @@ public class PhysReg implements Regulator {
     public ArrayList<Double> wHArr;
     public ArrayList<Double> pEArr;
 
-    public PhysReg(double d, double tU, double tX, double dt, double tSet, double t_filtre) {
+    public PhysReg(double d, double tU, double tX, double dt, double tSet, double t_filtre, double pe_filtre) {
         this.d = d;
         this.tU = tU;
         this.tX = tX;
         this.dt = dt;
         this.tSet = tSet;
         this.t_filtre = t_filtre;
+        this.pe_filtre = pe_filtre;
         bhta = 0;
         p = 0;
         tFiltre = new MAVG(2, dt, t_filtre, true);
-        pEFiltre = new MAVG(1, dt, tX, true);
+        pEFiltre = new MAVG(1, dt, pe_filtre, false);
         wHArr = new ArrayList<Double>();
         pEArr = new ArrayList<Double>();
     }
