@@ -18,7 +18,7 @@ public class Main {
         Random random = new Random();//создаем источник случайных чисел
         long seed = random.nextLong();
         random.setSeed(seed);
-        PID_Fine pid = new PID_Fine(6, 300, 200, 0.1, 40, 20);  //создаем ПИД-регулятор
+        PID_Fine pid = new PID_Fine(4.3, 60, 300, 0.1, 40, 20);  //создаем ПИД-регулятор
         //создаем физическую модель, передаем ей регулятор.
         model1 = new PhysModel(random, pid, 0.0001, 60, n) {
             @Override
@@ -29,7 +29,7 @@ public class Main {
         };
         System.out.printf("sum error model 1 = %f\n", model1.model(20, 17, 20));//моделируем, выводим отклонение
         random.setSeed(seed);
-        PhysReg pr = new PhysReg(50, 200, 300, 0.1, 20, 40, 300);
+        PhysReg pr = new PhysReg(600, 120, 300, 0.1, 20, 40, 300);
         //Создаем еще модель с тем-же генератором случайных чисел, но другим регулятором.
         model2 = new PhysModel(random, pr, 0.0001, 60, n) {
             @Override
@@ -52,10 +52,13 @@ public class Main {
         Diagramm.hold(true);
         Diagramm.plot(model2.timeArray, model2.powArray, Color.RED);
         double[] pE = pr.pEArr.stream().mapToDouble(d -> d * 1500).toArray();
+        double[] wH = pr.wHArr.stream().mapToDouble(d -> d * 1500).toArray();
         double[] xi = pid.xiArray.stream().mapToDouble(d -> d * 1500).toArray();
+        double[] eff = pr.eff.stream().mapToDouble(d -> d).toArray();
         Diagramm.plot(model2.timeArray, pE, Color.PINK);
         Diagramm.plot(model1.timeArray, xi, Color.CYAN);
         Diagramm.plot(model1.timeArray, model1.pEArray, Color.BLACK);
+        Diagramm.plot(model1.timeArray,wH, Color.MAGENTA);
     }
 
     static double functionT(double time) {

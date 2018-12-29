@@ -17,8 +17,10 @@ public class PhysReg implements Regulator {
     private double p;
     private MAVG tFiltre;
     private MAVG pEFiltre;
+    private Adap adap;
     public ArrayList<Double> wHArr;
     public ArrayList<Double> pEArr;
+    public ArrayList<Double> eff;
 
     public PhysReg(double d, double tU, double tX, double dt, double tSet, double t_filtre, double pe_filtre) {
         this.d = d;
@@ -31,9 +33,11 @@ public class PhysReg implements Regulator {
         bhta = 0;
         p = 0;
         tFiltre = new MAVG(2, dt, t_filtre, true);
-        pEFiltre = new MAVG(1, dt, pe_filtre, false);
+        pEFiltre = new MAVG(1, dt, pe_filtre, true);
+        adap = new Adap(t_filtre, pe_filtre, dt);
         wHArr = new ArrayList<Double>();
         pEArr = new ArrayList<Double>();
+        eff = new ArrayList<>();
     }
 
     @Override
@@ -42,7 +46,11 @@ public class PhysReg implements Regulator {
         double err = tSet - tFiltre.dnout[0];
         double dT = tFiltre.dnout[1];
         wH = ((1 - bhta) * p + bhta * pe - wH) / tU * dt + wH;
-        pEFiltre.mavg(wH - (1 - bhta) * d * dT);
+        double pE0 = wH - (1 - bhta) * d * dT;
+        double currentEff = adap.adap(pE0, dt) + 1e-6;
+        eff.add(currentEff);
+        pEFiltre.tau = t_filtre / (currentEff);
+        pEFiltre.mavg(pE0);
         pe = pEFiltre.dnout[0];
         double pRaw = d * err / tX - d * dT * tU / tX + pe;
         p = pRaw;

@@ -4,24 +4,26 @@ import Regulators.MAVG;
 
 public class Adap {
     private MAVG filtre, mid;
-    public double dt;
-    private double valmid;
-    private double val;
-    private double dval;
+    public double dt, tAdap;
+    private double vol;
 
     public Adap(double pre, double adap, double dt) {
-        filtre = new MAVG(2, dt, pre, false);
+        filtre = new MAVG(2, dt, pre, true);
         mid = new MAVG(1, dt, adap, false);
         this.dt = dt;
+        this.tAdap = adap;
     }
 
-    public void adap(double input, double dt) {
+    public double adap(double input, double dt) {
         filtre.dt = dt;
         filtre.mavg(input);
-        val = filtre.dnout[0];
-        dval = filtre.dnout[1];
+        double val = filtre.dnout[0];
+        double dval = filtre.dnout[1];
         mid.dt = dt;
         mid.mavg(val);
-        valmid = mid.dnout[0];
+        double valmid = mid.dnout[0];
+        vol = vol * (1 - dt / tAdap) + Math.abs(dval);
+        double move = val - valmid;
+        return move * move / (move * move + vol * vol) * 2;
     }
 }

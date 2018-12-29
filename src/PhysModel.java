@@ -11,12 +11,12 @@ public class PhysModel {
     public Regulator regulator;
     private double dt = 0.1;          //шаг времени моделирования, сек.
     private int n;           //число моделируемых точек
-    private double qOutRoom = 500;   //Теплопроводность стен комнаты, Вт/кельвин
-    private double cRoom = 300000;   //Теплоемкость комнаты, Дж/кельвин
+    private double qOutRoom = 50;   //Теплопроводность стен комнаты, Вт/кельвин
+    private double cRoom = 900000;   //Теплоемкость комнаты, Дж/кельвин
     private double qHeaterRoom = 30;//Теплопроводность нагревателя, Вт/кельвин
-    private double cHeater = 500;    //Теплоемкость нагревателя, Дж/кельвин
+    private double cHeater = 3600;    //Теплоемкость нагревателя, Дж/кельвин
     private double pHeaterMax = 1500;//Мощность нагревателя, Вт
-    private double tSensor = 60;     //Инерция датчика, сек
+    private double tSensor = 6;     //Инерция датчика, сек
     private double fluctAmp;           //амплитуда флуктуаций температуры измеряемой датчиком, градусов в секунду
     private double fluctTime;          //время ослабления накопленной флуктуации датчика, сек.
     private Random random;
@@ -59,7 +59,7 @@ public class PhysModel {
             tOut = setTOut((double) i * dt);
             tRoom = tRoom + (tHeater - tRoom) * qHeaterRoom / cRoom * dt + (tOut - tRoom) * qOutRoom / cRoom * dt;
             pHeater = limit(regulator.control(tSensor)) * pHeaterMax;
-            tHeater = tHeater + (tRoom - tHeater) * qHeaterRoom / cHeater * dt + pHeater / cHeater;
+            tHeater = tHeater + (tRoom - tHeater) * qHeaterRoom / cHeater * dt + pHeater / cHeater * dt;
             sensorErr = sensorErr * (1 - dt / fluctTime) + (random.nextDouble() - 0.5) * fluctAmp * dt;
             dSense0 = (tRoom - sens0) / this.tSensor * dt;
             dSense1 = (sens0 - tSensor) / this.tSensor * dt;
@@ -73,8 +73,8 @@ public class PhysModel {
             timeArray[i] = i * dt;
             tOutArray[i] = tOut;
             powArray[i] = pHeater;
-            pEArray[i] = (tRoom - tOut) * qOutRoom * dt;
-            wHArray[i] = (tHeater - tRoom) * qHeaterRoom * dt;
+            pEArray[i] = (tRoom - tOut) * qOutRoom;
+            wHArray[i] = (tHeater - tRoom) * qHeaterRoom;
             err += Math.pow((tRoom - set),2)/n;
         }
         return Math.sqrt(err); // среднеквадратичное отклонение

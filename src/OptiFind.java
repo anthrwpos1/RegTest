@@ -27,8 +27,9 @@ public class OptiFind {
                 double d = param[0];
                 double tU = param[1];           //получаем сами параметры
                 double tX = param[2];
-                double fPE = param[3];
-                PhysReg p = new PhysReg(d, tU, tX, dt, tSet, 1, fPE);   //создаем регулятор с тестовыми параметрами
+                double bhta = param[3];
+                PhysReg p = new PhysReg(d, tU, tX, dt, tSet, 1, tX);   //создаем регулятор с тестовыми параметрами
+                p.bhta = bhta;
                 PhysModel model = new PhysModel(r, p, 0.0001, 6,30000){
                     @Override
                     public double setTOut(double time) {
@@ -49,7 +50,7 @@ public class OptiFind {
 //                        arg.vect[0], arg.vect[1], arg.vect[2], arg.vect[3], err, iter);
             }
         };//подгоняем
-        mc.runMethod(10000, 0, new VecOp(new double[]{60, 16, 1, 3}), 1.001);//итог работы
+        mc.runMethod(10000, 0, new VecOp(new double[]{60, 16, 60, 1}), 1.001);//итог работы
 //        mc.runMethod(10000, 0, new VecOp(new double[]{1, 100, 16, 1}), 1.001);//итог работы
     }
 }
